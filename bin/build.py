@@ -47,62 +47,6 @@ if not os.path.isdir(RENDER):
 clips: typing.List[editor.VideoFileClip] = []
 
 # -------------------------------------------------------------
-# IMAGE CLIPS
-# Iterating over each of the Clips on the MEDIA directory.
-# -------------------------------------------------------------
-os.chdir(MEDIA)
-for filename in sorted(glob.iglob("**.jpeg")):
-
-    # -------------------------------------------------------------
-    # LOADING CLIP
-    # Loading each subclip using MoviePy.
-    # -------------------------------------------------------------
-    clip: editor.ImageClip = editor.ImageClip(filename)
-    print(f"Image clip: '{filename}'.")
-
-    # -------------------------------------------------------------
-    # SAMPLING
-    # Cutting video during development.
-    # -------------------------------------------------------------
-    if len(clips) > 1:                               # NOTE: Uncomment for sampling.
-        break                                        # NOTE: Uncomment for sampling.
-
-    # -------------------------------------------------------------
-    # CLIP MARGIN
-    # Adding margin to this clip.
-    # https://zulko.github.io/moviepy/examples/ukulele_concerto.html
-    # -------------------------------------------------------------
-    clip: editor.ImageClip = vfx.margin(clip, mar=20, color=(245, 248, 250))
-
-    # -------------------------------------------------------------
-    # CLIP DURATION
-    # Setting the clip duration for each image.
-    # -------------------------------------------------------------
-    clip: editor.ImageClip = clip.set_duration(5)
-
-    # -------------------------------------------------------------
-    # CLIP TRANSFORMATIONS
-    # Applying different video effects and styling to all Clips.
-    # -------------------------------------------------------------
-    # raise Exception(clip)
-    # clip: editor.ImageClip = vfx.fadein(clip, duration=1)
-    # clip: editor.ImageClip = vfx.fadeout(clip, duration=1)
-    # clip: editor.ImageClip = vfx.lum_contrast(clip, contrast=0.2, lum=3)
-
-    # -------------------------------------------------------------
-    # IMAGE AUDIO
-    # Setting an empty image audio for compatibility.
-    # https://stackoverflow.com/questions/64628311/set-audio-for-imageclip-using-moviepy
-    # -------------------------------------------------------------
-    clip.set_audio(editor.AudioFileClip())
-
-    # -------------------------------------------------------------
-    # NEXT CLIP
-    # Appending each Clip to the list of Clips.
-    # -------------------------------------------------------------
-    clips.append(clip)
-
-# -------------------------------------------------------------
 # MOVIE CLIPS
 # Iterating over each of the Clips on the MEDIA directory.
 # -------------------------------------------------------------
@@ -127,11 +71,10 @@ for filename in sorted(glob.iglob("**.mp4")):
 
     # -------------------------------------------------------------
     # SAMPLING
-    # Cutting video during development.
+    # Uncomment this code for sampling.
     # -------------------------------------------------------------
-    clip: editor.VideoFileClip = clip.subclip(0, 2)  # NOTE: Uncomment for sampling.
-    if len(clips) > 1:                               # NOTE: Uncomment for sampling.
-        break                                        # NOTE: Uncomment for sampling.
+    clip: editor.VideoFileClip = clip.subclip(0, 2)
+    if len(clips) > 2: break
 
     # -------------------------------------------------------------
     # CLIP MARGIN
@@ -156,7 +99,12 @@ for filename in sorted(glob.iglob("**.mp4")):
     # -------------------------------------------------------------
     for frames in clip.iter_frames():
         gray_frames = cv2.cvtColor(frames, cv2.COLOR_RGB2GRAY)
-        print(gray_frames)
+        # print(gray_frames)
+        # TODO
+        # TODO
+        # TODO
+        # TODO
+        # TODO
     # raise Exception(123)
 
     # -------------------------------------------------------------
@@ -182,6 +130,70 @@ for filename in sorted(glob.iglob("**.mp4")):
     # Appending each Clip to the list of Clips.
     # -------------------------------------------------------------
     clips.append(clip)
+
+# -------------------------------------------------------------
+# VIDEO RESIZING
+# Calculating the maximum height and width of videos
+# so that images can't be large than them.
+# -------------------------------------------------------------
+max_width: int = max(clip.size[0] for clip in clips)
+max_height: int = max(clip.size[0] for clip in clips)
+
+# -------------------------------------------------------------
+# IMAGE CLIPS
+# Iterating over each of the Clips on the MEDIA directory.
+# -------------------------------------------------------------
+os.chdir(MEDIA)
+for filename in sorted(glob.iglob("**.jpeg")):
+
+    # -------------------------------------------------------------
+    # LOADING CLIP
+    # Loading each subclip using MoviePy.
+    # -------------------------------------------------------------
+    clip: editor.ImageClip = editor.ImageClip(filename)
+    print(f"Image clip: '{filename}'.")
+
+    # -------------------------------------------------------------
+    # SAMPLING
+    # Uncomment this code for sampling.
+    # -------------------------------------------------------------
+    if len(clips) > 5: break
+
+    # -------------------------------------------------------------
+    # CLIP MARGIN
+    # Adding margin to this clip.
+    # https://zulko.github.io/moviepy/examples/ukulele_concerto.html
+    # -------------------------------------------------------------
+    clip: editor.ImageClip = vfx.margin(clip, mar=20, color=(245, 248, 250))
+
+    # -------------------------------------------------------------
+    # CLIP DURATION
+    # Setting the clip duration for each image.
+    # -------------------------------------------------------------
+    clip: editor.ImageClip = clip.set_duration(5)
+
+    # -------------------------------------------------------------
+    # CLIP TRANSFORMATIONS
+    # Applying different video effects and styling to all Clips.
+    # -------------------------------------------------------------
+    clip: editor.ImageClip = vfx.fadein(clip, duration=1)
+    clip: editor.ImageClip = vfx.fadeout(clip, duration=1)
+    clip: editor.ImageClip = vfx.lum_contrast(clip, contrast=0.2, lum=3)
+
+    # -------------------------------------------------------------
+    # RESIZING VIDEO
+    # https://zulko.github.io/moviepy/ref/videofx/moviepy.video.fx.all.resize.html
+    # -------------------------------------------------------------
+    if clip.size[0] > max_width:
+        clip: editor.ImageClip = vfx.resize(clip, width=max_width)
+    if clip.size[1] > max_height:
+        clip: editor.ImageClip = vfx.resize(clip, height=max_height)
+
+    # -------------------------------------------------------------
+    # NEXT CLIP
+    # Appending each Clip to the list of Clips.
+    # -------------------------------------------------------------
+    clips.insert(0, clip)
 
 # -------------------------------------------------------------
 # CLIPS MERGE

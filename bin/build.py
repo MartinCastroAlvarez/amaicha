@@ -45,6 +45,7 @@ if not os.path.isdir(RENDER):
 # Creating a list where individual Clips will be stored.
 # -------------------------------------------------------------
 clips: typing.List[editor.VideoFileClip] = []
+names: typing.List[str] = []
 
 # -------------------------------------------------------------
 # MOVIE CLIPS
@@ -115,6 +116,7 @@ for filename in sorted(glob.iglob("**.mp4")):
     # Appending each Clip to the list of Clips.
     # -------------------------------------------------------------
     clips.append(clip)
+    names.append(filename)
 
 # -------------------------------------------------------------
 # VIDEO RESIZING
@@ -129,7 +131,7 @@ max_height: int = max(clip.size[0] for clip in clips)
 # Iterating over each of the Clips on the MEDIA directory.
 # -------------------------------------------------------------
 os.chdir(MEDIA)
-for filename in sorted(glob.iglob("**.jpeg")):
+for i, filename in enumerate(sorted(glob.iglob("**.jpeg"))):
 
     # -------------------------------------------------------------
     # LOADING CLIP
@@ -178,7 +180,8 @@ for filename in sorted(glob.iglob("**.jpeg")):
     # NEXT CLIP
     # Appending each Clip to the list of Clips.
     # -------------------------------------------------------------
-    clips.insert(0, clip)
+    clips.insert(i, clip)
+    names.insert(i, filename)
 
 # -------------------------------------------------------------
 # CLIPS MERGE
@@ -187,7 +190,7 @@ for filename in sorted(glob.iglob("**.jpeg")):
 final: editor.VideoFileClip = editor.concatenate_videoclips(clips,
                                                             method="compose",
                                                             bg_color=(0, 0, 0))
-print(f'All video clips: {final}')
+print(f'All video clips: {names}')
 
 # -------------------------------------------------------------
 # TEXT CLIP

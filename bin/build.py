@@ -62,9 +62,9 @@ for filename in sorted(glob.iglob("**.mp4"))[:SAMPLE]:
     clip: editor.VideoFileClip = vfx.fadein(clip, duration=0.5)
     clip: editor.VideoFileClip = vfx.fadeout(clip, duration=0.5)
     clip: editor.VideoFileClip = vfx.lum_contrast(clip, contrast=0)
-    clip: editor.VideoFileClip = vfx.lum_contrast(clip, lum=1)
-    clip: editor.VideoFileClip = vfx.speedx(clip, factor=0.95)
-    clip: editor.VideoFileClip = vfx.gamma_corr(clip, gamma=0)
+    # clip: editor.VideoFileClip = vfx.lum_contrast(clip, lum=1)
+    # clip: editor.VideoFileClip = vfx.speedx(clip, factor=0.95)
+    # clip: editor.VideoFileClip = vfx.gamma_corr(clip, gamma=0)
 
     # ENHANCHED RESULT
     # Storing enhanced intermediate result into the ENHANCED directory.

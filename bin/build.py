@@ -90,7 +90,7 @@ for filename in sorted(glob.iglob("**.mp4")):
     clip: editor.VideoFileClip = vfx.fadein(clip, duration=1)
     clip: editor.VideoFileClip = vfx.fadeout(clip, duration=1)
     clip: editor.VideoFileClip = vfx.lum_contrast(clip, contrast=0.2, lum=3)
-    clip: editor.VideoFileClip = vfx.speedx(clip, factor=0.90)
+    # clip: editor.VideoFileClip = vfx.speedx(clip, factor=0.90)
 
     # -------------------------------------------------------------
     # CLIP AUDIO
@@ -155,7 +155,7 @@ for filename in sorted(glob.iglob("**.jpeg")):
     # CLIP DURATION
     # Setting the clip duration for each image.
     # -------------------------------------------------------------
-    clip: editor.ImageClip = clip.set_duration(8)
+    clip: editor.ImageClip = clip.set_duration(5)
 
     # -------------------------------------------------------------
     # CLIP TRANSFORMATIONS
@@ -227,12 +227,25 @@ audio: editor.AudioFileClip = afx.audio_fadein(audio, duration=1)
 audio: editor.AudioFileClip = afx.audio_fadeout(audio, duration=1)
 
 # -------------------------------------------------------------
+# AUDIO LOOP
+# Creating an infinite loop of the audio so that it is enough
+# to cover the video.
+# TODO: In future versions, multiple audios should be supported.
+# -------------------------------------------------------------
+audio: editor.AudioFileClip = afx.audio_loop(audio, nloops=100)
+
+# -------------------------------------------------------------
 # AUDIO VIDEO
 # Concatenating audio and video clips.
 # -------------------------------------------------------------
-audio: editor.AudioFileClip = audio.set_duration(final.duration)
+if final.audio.duration > audio.duration:
+    raise RuntimeError("Video is longer than the Audio:", final.audio.duration, audio.duration)
+final: editor.AudioFileClip = final.set_duration(int(final.duration))
+audio: editor.AudioFileClip = audio.set_duration(int(final.duration))
 final: editor.VideoFileClip = final.set_audio(editor.CompositeAudioClip([final.audio, audio]))
 print(f'Audio File: {audio}')
+if final.audio.duration != audio.duration:
+    raise RuntimeError("Video and Audio are out of sync:", final.audio.duration, audio.duration)
 
 # -------------------------------------------------------------
 # GLOBAL TRANSFORMATIONS

@@ -1,5 +1,6 @@
-# Uiza
-Birthday movie generator using MoviePy.
+# Amaicha
+Movie generator using MoviePy, OpenCV2 and Numpy.
+![alt-img](./wallpaper.jpg)
 
 ### Installation
 ```bash

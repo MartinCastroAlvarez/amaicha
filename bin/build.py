@@ -66,6 +66,12 @@ for filename in sorted(glob.iglob("**.mp4")):
     clip: editor.VideoFileClip = vfx.speedx(clip, factor=0.90)
     # clip: editor.VideoFileClip = vfx.supersample(clip, d=0.1, nframes=1)
 
+    # CLIP MARGIN
+    # Adding margin to this clip.
+    # https://zulko.github.io/moviepy/examples/ukulele_concerto.html
+    margin( 6,color=(255,255,255)).  #white margin
+    margin( bottom=20, right=20, opacity=0). # transparent
+
     # CLIP AUDIO
     # Detecting the audio volumeX factor dynamically.
     # https://stackoverflow.com/questions/28119082
@@ -80,7 +86,7 @@ for filename in sorted(glob.iglob("**.mp4")):
     low: int = int(PERCENTILE * sound.shape[0])
     high: int = int((1 - PERCENTILE) * sound.shape[0])
     volume: float = np.average(sound[low:high])
-    factor: float = 30.3 * volume + 0.0697 / volume +  0.41
+    factor: float = 10.3 * volume + 0.0997 / volume +  0.41
     clip: editor.VideoFileClip = afx.volumex(clip, factor=factor)
 
     # NEXT CLIP
@@ -112,7 +118,7 @@ filename: str = [
     if "TEMP" not in audio
 ][0]
 audio: editor.AudioFileClip = editor.AudioFileClip(filename)
-audio: editor.AudioFileClip = afx.volumex(audio, factor=0.5)
+audio: editor.AudioFileClip = afx.volumex(audio, factor=0.4)
 
 # AUDIO VIDEO
 # Concatenating audio and video clips.

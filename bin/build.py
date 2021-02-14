@@ -73,8 +73,8 @@ for filename in sorted(glob.iglob("**.mp4")):
     # SAMPLING
     # Uncomment this code for sampling.
     # -------------------------------------------------------------
-    clip: editor.VideoFileClip = clip.subclip(0, 2)
-    if len(clips) > 2: break
+    # clip: editor.VideoFileClip = clip.subclip(0, 4)
+    # if len(clips) > 4: break
 
     # -------------------------------------------------------------
     # CLIP MARGIN
@@ -90,22 +90,7 @@ for filename in sorted(glob.iglob("**.mp4")):
     clip: editor.VideoFileClip = vfx.fadein(clip, duration=1)
     clip: editor.VideoFileClip = vfx.fadeout(clip, duration=1)
     clip: editor.VideoFileClip = vfx.lum_contrast(clip, contrast=0.2, lum=3)
-    clip: editor.VideoFileClip = vfx.speedx(clip, factor=0.95)
-
-    # -------------------------------------------------------------
-    # CLIP COLORS
-    # Updating the colors of the Clip using OpenCV.
-    # https://stackoverflow.com/questions/41596381
-    # -------------------------------------------------------------
-    for frames in clip.iter_frames():
-        gray_frames = cv2.cvtColor(frames, cv2.COLOR_RGB2GRAY)
-        # print(gray_frames)
-        # TODO
-        # TODO
-        # TODO
-        # TODO
-        # TODO
-    # raise Exception(123)
+    clip: editor.VideoFileClip = vfx.speedx(clip, factor=0.90)
 
     # -------------------------------------------------------------
     # CLIP AUDIO
@@ -122,7 +107,7 @@ for filename in sorted(glob.iglob("**.mp4")):
     low: int = int(PERCENTILE * sound.shape[0])
     high: int = int((1 - PERCENTILE) * sound.shape[0])
     volume: float = np.average(sound[low:high])
-    factor: float = 10.3 * volume + 0.0997 / volume +  0.41
+    factor: float = max(0.1, 10.3 * volume + 0.1597 / volume - 0.41)
     clip: editor.VideoFileClip = afx.volumex(clip, factor=factor)
 
     # -------------------------------------------------------------
@@ -157,7 +142,7 @@ for filename in sorted(glob.iglob("**.jpeg")):
     # SAMPLING
     # Uncomment this code for sampling.
     # -------------------------------------------------------------
-    if len(clips) > 5: break
+    # if len(clips) > 5: break
 
     # -------------------------------------------------------------
     # CLIP MARGIN
@@ -170,7 +155,7 @@ for filename in sorted(glob.iglob("**.jpeg")):
     # CLIP DURATION
     # Setting the clip duration for each image.
     # -------------------------------------------------------------
-    clip: editor.ImageClip = clip.set_duration(5)
+    clip: editor.ImageClip = clip.set_duration(8)
 
     # -------------------------------------------------------------
     # CLIP TRANSFORMATIONS
@@ -201,19 +186,23 @@ for filename in sorted(glob.iglob("**.jpeg")):
 # -------------------------------------------------------------
 final: editor.VideoFileClip = editor.concatenate_videoclips(clips,
                                                             method="compose",
-                                                            bg_color=(40, 40, 40))
+                                                            bg_color=(0, 0, 0))
 print(f'All video clips: {final}')
 
 # -------------------------------------------------------------
 # TEXT CLIP
 # Adding title text to the movie clips.
+# https://www.geeksforgeeks.org/moviepy-creating-text-clip/
 # -------------------------------------------------------------
-# text: editor.TextClip = editor.TextClip("Feliz Cumple!")
-# text: editor.TextClip = text.set_position('center')
+# text: editor.TextClip = editor.TextClip("Feliz Cumple!",
+#                                         font="Arial-Bold",
+#                                         fontsize=70,
+#                                         color="white")
+# text: editor.TextClip = text.set_position(('center', 'bottom'))
 # text: editor.TextClip = text.set_duration(final.duration)
-# print(f'Text Clip: {text_clip}')
+# print(f'Text clip: {text}')
 # final: editor.CompositeVideoClip([final, text])
-# print(f'Final Clip: {final}')
+# print(f'Final clip: {final}')
 
 # -------------------------------------------------------------
 # AUDIO CLIP
@@ -228,7 +217,14 @@ filename: str = [
     if "TEMP" not in audio
 ][0]
 audio: editor.AudioFileClip = editor.AudioFileClip(filename)
-audio: editor.AudioFileClip = afx.volumex(audio, factor=0.4)
+audio: editor.AudioFileClip = afx.volumex(audio, factor=0.5)
+
+# -------------------------------------------------------------
+# AUDIO TRANSFORMATIONS
+# Applying different audio effects to the background audio.
+# -------------------------------------------------------------
+audio: editor.AudioFileClip = afx.audio_fadein(audio, duration=1)
+audio: editor.AudioFileClip = afx.audio_fadeout(audio, duration=1)
 
 # -------------------------------------------------------------
 # AUDIO VIDEO

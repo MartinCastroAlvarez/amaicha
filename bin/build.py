@@ -8,10 +8,11 @@ import glob
 import typing
 
 import cv2
+import numpy as np
+
 from moviepy import editor
 import moviepy.video.fx.all as vfx
-
-SAMPLE: int = 3  # TODO: Remove this.
+import moviepy.audio.fx.all as afx
 
 # ROOT DIRECTORY
 # This is the root directory of the application.
@@ -25,13 +26,6 @@ print(f'Media directory: {MEDIA}')
 if not os.path.isdir(MEDIA):
     os.mkdir(MEDIA)
 
-# ENHANCED DIRECTORY
-# This directory is used for intermediate results.
-ENHANCED: str = os.path.join(ROOT, "enhanced")
-print(f'Media directory: {ENHANCED}')
-if not os.path.isdir(ENHANCED):
-    os.mkdir(ENHANCED)
-
 # RENDER DIRECTORY
 # This directory is used to store the final result.
 RENDER: str = os.path.join(ROOT, "render")
@@ -43,11 +37,11 @@ if not os.path.isdir(RENDER):
 # Iterating over each of the Clips on the MEDIA directory.
 clips: typing.List[editor.VideoFileClip] = []
 os.chdir(MEDIA)
-for filename in sorted(glob.iglob("**.mp4"))[:SAMPLE]:
+for filename in sorted(glob.iglob("**.mp4")):
 
     # LOADING CLIP
     # Loading each subclip using MoviePy.
-    print(f'Video File: {filename}')
+    # print(f'Video File: {filename}')
     clip: editor.VideoFileClip = editor.VideoFileClip(filename)
 
     # CLIP ROTATION
@@ -57,19 +51,37 @@ for filename in sorted(glob.iglob("**.mp4"))[:SAMPLE]:
         clip: editor.VideoFileClip = clip.resize(clip.size[::-1])
         clip.rotation = 0
 
+    # SAMPLING
+    # Cutting video during development.
+    clip: editor.VideoFileClip = clip.subclip(0, 9)  # NOTE: Uncomment for sampling.
+    if len(clips) > 3:                               # NOTE: Uncomment for sampling.
+        break                                        # NOTE: Uncomment for sampling.
+
     # CLIP TRANSFORMATIONS
-    # Applying different effects and styling to all Clips.
+    # Applying different video effects and styling to all Clips.
     clip: editor.VideoFileClip = vfx.fadein(clip, duration=0.5)
     clip: editor.VideoFileClip = vfx.fadeout(clip, duration=0.5)
     clip: editor.VideoFileClip = vfx.lum_contrast(clip, contrast=0)
-    # clip: editor.VideoFileClip = vfx.lum_contrast(clip, lum=1)
-    # clip: editor.VideoFileClip = vfx.speedx(clip, factor=0.95)
-    # clip: editor.VideoFileClip = vfx.gamma_corr(clip, gamma=0)
+    clip: editor.VideoFileClip = vfx.lum_contrast(clip, lum=0.5)
+    clip: editor.VideoFileClip = vfx.speedx(clip, factor=0.90)
+    # clip: editor.VideoFileClip = vfx.supersample(clip, d=0.1, nframes=1)
 
-    # ENHANCHED RESULT
-    # Storing enhanced intermediate result into the ENHANCED directory.
-    # path: str = os.path.join(ENHANCED, filename)
-    # clip.write_videofile(path, fps=23.98)
+    # CLIP AUDIO
+    # Detecting the audio volumeX factor dynamically.
+    # https://stackoverflow.com/questions/28119082
+    # https://stackoverflow.com/questions/9012761
+    #
+    # The curve has been fit with this tool:
+    # http://www.colby.edu/chemistry/PChem/scripts/lsfitpl.html
+    sound: np.array = clip.audio.to_soundarray(fps=22000)
+    sound: np.array = sound[sound > 0]
+    sound.sort()
+    PERCENTILE: float = 0.1
+    low: int = int(PERCENTILE * sound.shape[0])
+    high: int = int((1 - PERCENTILE) * sound.shape[0])
+    volume: float = np.average(sound[low:high])
+    factor: float = 30.3 * volume + 0.0697 / volume +  0.41
+    clip: editor.VideoFileClip = afx.volumex(clip, factor=factor)
 
     # NEXT CLIP
     # Appending each Clip to the list of Clips.
@@ -94,11 +106,23 @@ print(f'All video clips: {final}')
 # https://stackoverflow.com/questions/55032551/moviepy-add-audio-to-a-video
 # https://zulko.github.io/moviepy/getting_started/audioclips.html
 os.chdir(MEDIA)
-filename: str = list(glob.iglob("**.mp3"))[0]
+filename: str = [
+    audio
+    for audio in glob.iglob("**.mp3")
+    if "TEMP" not in audio
+][0]
 audio: editor.AudioFileClip = editor.AudioFileClip(filename)
+audio: editor.AudioFileClip = afx.volumex(audio, factor=0.5)
+
+# AUDIO VIDEO
+# Concatenating audio and video clips.
 audio: editor.AudioFileClip = audio.set_duration(final.duration)
-final.set_audio(editor.CompositeAudioClip([final.audio, audio]))
+final: editor.VideoFileClip = final.set_audio(editor.CompositeAudioClip([final.audio, audio]))
 print(f'Audio File: {audio}')
+
+# GLOBAL TRANSFORMATIONS
+# Applying transformations to the video after everything has been merged.
+final: editor.VideoFileClip = afx.volumex(final, factor=0.8)
 
 # RENDERING
 # Storing the final clip into the RENDER directory.
